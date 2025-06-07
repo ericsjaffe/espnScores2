@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Live Sports Scores</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
@@ -12,7 +17,6 @@
             background-color: #f5f5f5;
             color: #141414;
         }
-
         header {
             background-color: #CC0000;
             color: white;
@@ -20,13 +24,45 @@
             text-align: center;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
         header h1 {
             margin: 0;
             font-size: 2rem;
             font-weight: 700;
         }
-
+        #menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+        }
+        nav#sports-nav {
+            background-color: #141414;
+            overflow-x: auto;
+            white-space: nowrap;
+            border-bottom: 2px solid #cc0000;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        nav#sports-nav a {
+            display: inline-block;
+            color: white;
+            padding: 0.5rem 1rem;
+            margin: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: background 0.2s, transform 0.3s ease;
+        }
+        nav#sports-nav a:hover,
+        nav#sports-nav a.active {
+            background-color: #cc0000;
+            transform: scale(1.05);
+        }
         .container {
             max-width: 900px;
             margin: 2rem auto;
@@ -35,7 +71,6 @@
             border-radius: 6px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
-
         h2 {
             margin-top: 2rem;
             border-bottom: 2px solid #ccc;
@@ -43,19 +78,16 @@
             color: #CC0000;
             font-size: 1.4rem;
         }
-
         p {
             font-size: 1rem;
             line-height: 1.6;
             margin: 0.5rem 0;
         }
-
         hr {
             border: 0;
             border-top: 1px solid #ddd;
             margin: 1rem 0;
         }
-
         footer {
             text-align: center;
             font-size: 0.9rem;
@@ -63,67 +95,128 @@
             margin-top: 4rem;
             padding-bottom: 2rem;
         }
+        @media (max-width: 768px) {
+            nav#sports-nav {
+                flex-direction: column;
+                display: none;
+            }
+            nav#sports-nav.show {
+                display: flex;
+            }
+            #menu-toggle {
+                display: block;
+                color: white;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
+        <i id="menu-toggle" class="fas fa-bars"></i>
         <h1>Live Sports Scores</h1>
     </header>
-
+    <nav id="sports-nav">
+        <!-- Nav links populated dynamically -->
+    </nav>
     <div class="container" id="score-container">
-        {% for sport, games in all_scores.items() %}
-            <h2>{{ sport }}</h2>
-            {% if games %}
-                {% for game in games %}
-                    <p>
-                        <strong>{{ game.away_team }}</strong> ({{ game.away_score }}) vs
-                        <strong>{{ game.home_team }}</strong> ({{ game.home_score }})<br>
-                        <em>Status:</em> {{ game.status }}
-                    </p>
-                    <hr>
-                {% endfor %}
-            {% else %}
-                <p>No current games.</p>
-            {% endif %}
-        {% endfor %}
+        <!-- Score sections populated dynamically -->
     </div>
-
     <footer>
         Data provided by ESPN APIs. This site is not affiliated with ESPN.
     </footer>
-
     <script>
+        const sportIcons = {
+            "NFL Football": "fa-football",
+            "MLB": "fa-baseball",
+            "College Football": "fa-graduation-cap",
+            "Men's Basketball": "fa-basketball",
+            "Women's Basketball": "fa-basketball",
+            "College Softball": "fa-softball",
+            "College Baseball": "fa-baseball",
+            "Men's Ice Hockey": "fa-hockey-puck"
+        };
+
         async function fetchScores() {
             try {
                 const response = await fetch('/api/scores');
                 const data = await response.json();
                 const container = document.getElementById("score-container");
+                const nav = document.getElementById("sports-nav");
                 container.innerHTML = "";
+                nav.innerHTML = "";
 
                 for (const [sport, games] of Object.entries(data)) {
-                    const h2 = document.createElement("h2");
-                    h2.textContent = sport;
-                    container.appendChild(h2);
+                    const id = sport.replace(/\s+/g, "_");
+                    const icon = sportIcons[sport] || "fa-star";
+
+                    // Nav link
+                    const a = document.createElement("a");
+                    a.href = `#${id}`;
+                    a.innerHTML = `<i class='fa-solid ${icon}'></i> ${sport}`;
+                    nav.appendChild(a);
+
+                    // Section
+                    const section = document.createElement("section");
+                    section.id = id;
+                    section.className = "score-section";
+                    section.innerHTML = `<h2>${sport}</h2>`;
 
                     if (games.length === 0) {
-                        const p = document.createElement("p");
-                        p.textContent = "No current games.";
-                        container.appendChild(p);
+                        section.innerHTML += `<p>No current games.</p>`;
                     } else {
                         games.forEach(game => {
-                            const p = document.createElement("p");
-                            p.innerHTML = `<strong>${game.away_team}</strong> (${game.away_score}) vs <strong>${game.home_team}</strong> (${game.home_score})<br><em>Status:</em> ${game.status}`;
-                            container.appendChild(p);
-                            container.appendChild(document.createElement("hr"));
+                            section.innerHTML += `
+                                <p><strong>${game.away_team}</strong> (${game.away_score}) vs
+                                <strong>${game.home_team}</strong> (${game.home_score})<br>
+                                <em>Status:</em> ${game.status}</p><hr>`;
                         });
                     }
+                    container.appendChild(section);
                 }
+
+                observeSections();
             } catch (error) {
                 console.error("Failed to fetch scores:", error);
             }
         }
 
-        // Initial fetch + every 60 seconds
+        function observeSections() {
+            const sections = document.querySelectorAll('.score-section');
+            const navLinks = document.querySelectorAll('#sports-nav a');
+            const observer = new IntersectionObserver(
+                entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            navLinks.forEach(link => {
+                                link.classList.toggle(
+                                    'active',
+                                    link.getAttribute('href') === `#${entry.target.id}`
+                                );
+                            });
+                            localStorage.setItem('scrollTarget', entry.target.id);
+                        }
+                    });
+                },
+                {
+                    rootMargin: '-50% 0px -40% 0px',
+                    threshold: 0.1
+                }
+            );
+            sections.forEach(section => observer.observe(section));
+        }
+
+        // Restore last position on reload
+        window.addEventListener('load', () => {
+            const target = localStorage.getItem('scrollTarget');
+            if (target && document.getElementById(target)) {
+                document.getElementById(target).scrollIntoView();
+            }
+        });
+
+        document.getElementById("menu-toggle").addEventListener("click", () => {
+            document.getElementById("sports-nav").classList.toggle("show");
+        });
+
         fetchScores();
         setInterval(fetchScores, 60000);
     </script>
