@@ -1,18 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Live College Baseball Scores</title>
-    <meta http-equiv="refresh" content="60">
+    <title>Live College Sports Scores</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; background-color: #f9f9f9; }
+        h1, h2 { color: #2c3e50; }
+        p { line-height: 1.4; }
+        hr { border: 0; border-top: 1px solid #ccc; margin: 1rem 0; }
+    </style>
 </head>
 <body>
-    <h1>Live College Baseball Scores</h1>
-    {% for game in scores %}
-        <p>
-            <strong>{{ game.away_team }}</strong> ({{ game.away_score }}) vs
-            <strong>{{ game.home_team }}</strong> ({{ game.home_score }}) <br>
-            <em>Status:</em> {{ game.status }}
-        </p>
-        <hr>
-    {% endfor %}
+    <h1>Live College Sports Scores</h1>
+    <div id="score-container">
+        {% for sport, games in all_scores.items() %}
+            <h2>{{ sport }}</h2>
+            {% if games %}
+                {% for game in games %}
+                    <p>
+                        <strong>{{ game.away_team }}</strong> ({{ game.away_score }}) vs
+                        <strong>{{ game.home_team }}</strong> ({{ game.home_score }})<br>
+                        <em>Status:</em> {{ game.status }}
+                    </p>
+                    <hr>
+                {% endfor %}
+            {% else %}
+                <p>No current games.</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <script>
+        async function fetchScores() {
+            try {
+                const response = await fetch('/api/scores');
+                const data = await response.json();
+                const container = document.getElementById("score-container");
+                container.innerHTML = "";
+
+                for (const [sport, games] of Object.entries(data)) {
+                    const h2 = document.createElement("h2");
+                    h2.textContent = sport;
+                    container.appendChild(h2);
+
+                    if (games.length === 0) {
+                        const p = document.createElement("p");
+                        p.textContent = "No current games.";
+                        container.appendChild(p);
+                    } else {
+                        games.forEach(game => {
+                            const p = document.createElement("p");
+                            p.innerHTML = `<strong>${game.away_team}</strong> (${game.away_score}) vs <strong>${game.home_team}</strong> (${game.home_score})<br><em>Status:</em> ${game.status}`;
+                            container.appendChild(p);
+                            container.appendChild(document.createElement("hr"));
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch scores:", error);
+            }
+        }
+
+        // Fetch scores initially and every 60 seconds
+        fetchScores();
+        setInterval(fetchScores, 60000);
+    </script>
 </body>
 </html>
