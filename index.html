@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live College Baseball Scores</title>
+    <meta http-equiv="refresh" content="60">
+</head>
+<body>
+    <h1>Live College Baseball Scores</h1>
+    {% for game in scores %}
+        <p>
+            <strong>{{ game.away_team }}</strong> ({{ game.away_score }}) vs
+            <strong>{{ game.home_team }}</strong> ({{ game.home_score }}) <br>
+            <em>Status:</em> {{ game.status }}
+        </p>
+        <hr>
+    {% endfor %}
+</body>
+</html>
