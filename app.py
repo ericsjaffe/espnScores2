@@ -5,10 +5,12 @@ app = Flask(__name__)
 
 SPORTS = {
     "College Baseball": "https://site.api.espn.com/apis/site/v2/sports/baseball/college-baseball/scoreboard",
+    "MLB": "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard",
     "College Softball": "https://site.api.espn.com/apis/site/v2/sports/softball/college-softball/scoreboard",
     "Men's Basketball": "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard",
     "Women's Basketball": "https://site.api.espn.com/apis/site/v2/sports/basketball/womens-college-basketball/scoreboard",
     "College Football": "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard",
+    "NFL Football": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard",
     "Men's Ice Hockey": "https://site.api.espn.com/apis/site/v2/sports/hockey/mens-college-hockey/scoreboard"
 }
 
